@@ -23,7 +23,7 @@ function parse_input() {
 }
 
 is_ip_address() {
-  if [[ $1 =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]]; then
+if [[ "$1" == *:* ]]; then
     echo "true"
   else
     echo "false"
@@ -31,7 +31,7 @@ is_ip_address() {
 }
 
 get_reservation() {
-  reservation=$(curl -s "http://${ipam}/api/getIPs.php?apiapp=address&apitoken=${ipam_token}&domain=${hostname}")
+  reservation=$(curl -s -k "https://${ipam}/api/getIPs.php?apiapp=address&apitoken=${ipam_token}&domain=${hostname}")
   if [[ "${reservation}" == "[]" ]]; then
     echo "empty"
   else
@@ -60,7 +60,7 @@ function produce_output() {
   # currency safety in the IPAM server.
   while [[ $SECONDS -lt $timeout ]]
   do
-    ip_address=$(curl -s "http://$ipam/api/getFreeIP.php?apiapp=address&apitoken=$ipam_token&subnet=${network}&host=${hostname}")
+    ip_address=$(curl -s -k "https://$ipam/api/getFreeIP.php?apiapp=address&apitoken=$ipam_token&subnet=${network}&host=${hostname}")
 
     if [[ "$(is_ip_address "${ip_address}")" != "true" ]]; then 
       error_exit "could not reserve an IP address: malformed data: ${ip_address}"
@@ -95,3 +95,4 @@ function produce_output() {
 check_deps
 parse_input
 produce_output
+
