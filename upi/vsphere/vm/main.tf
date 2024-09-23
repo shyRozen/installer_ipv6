@@ -29,7 +29,7 @@ resource "vsphere_virtual_machine" "vm" {
   extra_config = {
     "guestinfo.ignition.config.data"           = base64encode(var.ignition)
     "guestinfo.ignition.config.data.encoding"  = "base64"
-      "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${cidrnetmask(var.machine_cidr)}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
+      "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${regex("\\/(\\d+)$", var.machine_cidr)}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
     "stealclock.enable"                        = "TRUE"
   }
 }
