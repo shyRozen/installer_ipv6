@@ -20,7 +20,7 @@ resource "null_resource" "ip_address" {
   triggers = {
     ipam       = var.ipam
     ipam_token = var.ipam_token
-    network    = local.network
+    network    = var.machine_cidr
     hostname   = each.key
   }
 
