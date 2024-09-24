@@ -26,10 +26,16 @@ resource "vsphere_virtual_machine" "vm" {
     template_uuid = var.template_uuid
   }
 
+  locals {
+    cidr_prefix = element(split("/", var.machine_cidr), 1)
+  }
+
+
+
   extra_config = {
     "guestinfo.ignition.config.data"           = base64encode(var.ignition)
     "guestinfo.ignition.config.data.encoding"  = "base64"
-      "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${element(split(\"/\", var.machine_cidr), 1)}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
+      "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${local.cidr_prefix}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
     "stealclock.enable"                        = "TRUE"
   }
 }
