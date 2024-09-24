@@ -1,3 +1,8 @@
+locals {
+  cidr_prefix = element(split("/", var.machine_cidr), 1)
+}
+
+
 resource "vsphere_virtual_machine" "vm" {
   name = var.vmname
 
@@ -26,12 +31,7 @@ resource "vsphere_virtual_machine" "vm" {
     template_uuid = var.template_uuid
   }
 
-  locals {
-    cidr_prefix = element(split("/", var.machine_cidr), 1)
-  }
-
-
-
+  
   extra_config = {
     "guestinfo.ignition.config.data"           = base64encode(var.ignition)
     "guestinfo.ignition.config.data.encoding"  = "base64"
