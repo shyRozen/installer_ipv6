@@ -1,5 +1,6 @@
 locals {
   cidr_prefix = element(split("/", var.machine_cidr), 1)
+  base64ign = base64encode(var.ignition)
 }
 
 
@@ -33,7 +34,7 @@ resource "vsphere_virtual_machine" "vm" {
 
   
   extra_config = {
-    "guestinfo.ignition.config.data"           = base64encode(var.ignition)
+    "guestinfo.ignition.config.data"           = local.base64ign
     "guestinfo.ignition.config.data.encoding"  = "base64"
       "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${local.cidr_prefix}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
     "stealclock.enable"                        = "TRUE"
