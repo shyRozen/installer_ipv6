@@ -4,7 +4,7 @@ locals {
 }
 
 data "external" "gzip_base64" {
-  program = ["bash", "-c", "echo \"${var.ignition}\" | gzip -9 | base64 -w0 | awk '{print \"{\\\"encoded\\\": \\\"\" $0 \"\\\"}\"}'"]
+  program = ["bash", "-c", "echo \"${var.ignition}\" | gzip -9 | base64 -w0 | sed 's/^/{\"encoded\":\"/;s/$/\"}/'"]
 
   query = {}
 }
