@@ -7,8 +7,9 @@ data "external" "gzip_base64" {
   program = ["bash", "-c", <<EOT
     tmpfile=$(mktemp)
     echo "${var.ignition}" > $tmpfile
-    gzip -9 < $tmpfile | base64 -w0 | sed 's/^/{\"encoded\":\"/;s/$/\"}/'
+    encoded_output=$(gzip -9 < $tmpfile | base64 -w0)
     rm -f $tmpfile
+    echo "{\"encoded\": \"$encoded_output\"}"
   EOT
   ]
 
