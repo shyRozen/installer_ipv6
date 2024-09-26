@@ -4,7 +4,13 @@ locals {
 }
 
 data "external" "gzip_base64" {
-  program = ["bash", "-c", "echo \"${var.ignition}\" | gzip -9 | base64 -w0 | sed 's/^/{\"encoded\":\"/;s/$/\"}/'"]
+  program = ["bash", "-c", <<EOT
+    tmpfile=$(mktemp)
+    echo "${var.ignition}" > $tmpfile
+    gzip -9 < $tmpfile | base64 -w0 | sed 's/^/{\"encoded\":\"/;s/$/\"}/'
+    rm -f $tmpfile
+  EOT
+  ]
 
   query = {}
 }
