@@ -6,16 +6,20 @@ locals {
 data "external" "gzip_base64" {
   program = ["bash", "-c", <<EOT
     tmpfile=$(mktemp)
-    echo "${var.ignition}" > $tmpfile
-    encoded_output=$(gzip -9 < $tmpfile | base64 -w0)
-    rm -f $tmpfile
-    echo "{\"encoded\": \"$encoded_output\"}"
+    gzipfile=$(mktemp)
+    # Write ignition to a temporary file
+    cat > $tmpfile
+    # Gzip and base64 encode it, output to gzipfile
+    gzip -c $tmpfile | base64 -w0 > $gzipfile
+    # Read back the encoded content
+    encoded_output=$(cat $gzipfile)
+    # Cleanup
+    rm -f $tmpfile $gzipfile
+    # Output the result in JSON format
+    printf '{\"encoded\": \"%s\"}' "$encoded_output"
   EOT
   ]
-
-  query = {}
 }
-
 
 
 resource "vsphere_virtual_machine" "vm" {
