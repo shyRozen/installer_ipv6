@@ -3,6 +3,13 @@ locals {
  # base64ign = base64encode(var.ignition)
 }
 
+data "external" "gzip_base64" {
+  program = ["bash", "-c", "echo '${var.ignition}' | gzip -9 | base64 -w0"]
+
+  query = {}
+}
+
+
 
 resource "vsphere_virtual_machine" "vm" {
   name = var.vmname
@@ -34,8 +41,8 @@ resource "vsphere_virtual_machine" "vm" {
 
   
   extra_config = {
-    "guestinfo.ignition.config.data"           = var.ignition
-   # "guestinfo.ignition.config.data.encoding"  = "base64"
+    "guestinfo.ignition.config.data"           = data.external.gzip_base64.result
+   # "guestinfo.ignition.config.data.encoding"  = "gzip+base64"
     "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${local.cidr_prefix}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
     "stealclock.enable"                        = "TRUE"
   }
