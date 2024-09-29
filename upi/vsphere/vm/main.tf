@@ -35,8 +35,10 @@ resource "vsphere_virtual_machine" "vm" {
 
   
   extra_config = {
-    "guestinfo.ignition.config.data"           = var.ignition
-    "guestinfo.ignition.config.data.encoding"  = "gzip+base64"
+#    "guestinfo.ignition.config.data"           = var.ignition
+ #   "guestinfo.ignition.config.data.encoding"  = "gzip+base64"
+    "guestinfo.ignition.config.data"           = var.vmname == "lb-0" ? base64encode(var.ignition) : var.ignition
+    "guestinfo.ignition.config.data.encoding"  = var.vmname == "lb-0" ? "base64" : "gzip+base64"
     "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${local.cidr_prefix}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
     "stealclock.enable"                        = "TRUE"
   }
