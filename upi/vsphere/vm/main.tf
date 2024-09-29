@@ -15,7 +15,7 @@ data "external" "gzip_base64" {
     encoded_output=$(gzip -9 -c $tmpfile | base64 -w0)
     
     # Cleanup
-    rm -f $tmpfile
+    #rm -f $tmpfile
     
     # Output the result in JSON format
     echo "{\"encoded\": \"$encoded_output\"}"
