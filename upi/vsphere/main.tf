@@ -186,7 +186,8 @@ resource "vsphere_folder" "folder" {
 module "bootstrap" {
   source = "./vm"
 
-  ignition = file(concat(var.bootstrap_ignition_path, ".txt"))
+  #ignition = file(concat(var.bootstrap_ignition_path, ".txt"))
+  ignition = file(format("%s.txt", var.bootstrap_ignition_path))
 
   vmname                = element(split(".", local.bootstrap_fqdns[0]), 0)
   ipaddress             = module.ipam_bootstrap.ip_addresses[0]
@@ -218,7 +219,8 @@ module "control_plane_vm" {
 
   vmname = element(split(".", module.control_plane_a_records.fqdns[count.index]), 0)
   ipaddress = module.ipam_control_plane.ip_addresses[count.index]
-  ignition = file(concat(var.control_plane_ignition_path, ".txt"))
+  #ignition = file(concat(var.control_plane_ignition_path, ".txt"))
+  ignition = file(format("%s.txt", var.control_plane_ignition_path))
   resource_pool_id      = vsphere_resource_pool.resource_pool[count.index % local.failure_domain_count].id
   datastore_id          = data.vsphere_datastore.datastore[count.index % local.failure_domain_count].id
   datacenter_id         = data.vsphere_datacenter.dc[index(data.vsphere_datacenter.dc.*.name, local.failure_domains[count.index % local.failure_domain_count]["datacenter"])].id
@@ -236,7 +238,8 @@ module "control_plane_vm" {
 module "compute_vm" {
   count = length(module.compute_a_records.fqdns)
   source = "./vm"
-  ignition = file(concat(var.compute_ignition_path, ".txt"))
+  #ignition = file(concat(var.compute_ignition_path, ".txt"))
+  ignition = file(format("%s.txt", var.compute_ignition_path))
   vmname = element(split(".", module.compute_a_records.fqdns[count.index]), 0)
   ipaddress = module.ipam_compute.ip_addresses[count.index]
 
