@@ -5,18 +5,26 @@ locals {
 
 data "external" "gzip_base64" {
   program = ["bash", "-c", <<EOT
+    # Create a temporary file for the large Ignition content
     tmpfile=$(mktemp)
     
-    # Write the large Ignition content to the temporary file
-    echo '${var.ignition}' > $tmpfile
+    # Write the content of var.ignition to the temporary file using stdin
+    cat > $tmpfile
     
-    # Gzip the content with maximum compression (-9) and encode it in base64
-    gzip -9 -c $tmpfile | base64 -w0
+    # Gzip and base64 encode the temporary file's content
+    encoded_output=$(gzip -9 -c $tmpfile | base64 -w0)
     
     # Cleanup
     rm -f $tmpfile
+    
+    # Output the result in JSON format
+    echo "{\"encoded\": \"$encoded_output\"}"
   EOT
   ]
+  
+  query = {
+    content = var.ignition
+  }
 }
 
 
