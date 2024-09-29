@@ -3,29 +3,6 @@ locals {
  # base64ign = base64encode(var.ignition)
 }
 
-data "external" "gzip_base64" {
-  program = ["bash", "-c", <<EOT
-    # Create a temporary file for the large Ignition content
-    tmpfile=$(mktemp)
-    
-    # Write the content of var.ignition to the temporary file using stdin
-    cat > $tmpfile
-    
-    # Gzip and base64 encode the temporary file's content
-    encoded_output=$(gzip -9 -c $tmpfile | base64 -w0)
-    
-    # Cleanup
-    #rm -f $tmpfile
-    
-    # Output the result in JSON format
-    echo "{\"encoded\": \"$encoded_output\"}"
-  EOT
-  ]
-  
-  query = {
-    content = var.ignition
-  }
-}
 
 
 resource "vsphere_virtual_machine" "vm" {
@@ -58,7 +35,7 @@ resource "vsphere_virtual_machine" "vm" {
 
   
   extra_config = {
-    "guestinfo.ignition.config.data"           = data.external.gzip_base64.result.encoded
+    "guestinfo.ignition.config.data"           = var.ignition
     "guestinfo.ignition.config.data.encoding"  = "gzip+base64"
     "guestinfo.afterburn.initrd.network-kargs" = "ip=[${var.ipaddress}]::[${cidrhost(var.machine_cidr, 1)}]:${local.cidr_prefix}:${var.vmname}:ens192:none:${join(":", [for dns in var.dns_addresses : format("[%s]", dns)])}"
     "stealclock.enable"                        = "TRUE"
