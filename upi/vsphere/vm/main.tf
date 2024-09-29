@@ -16,7 +16,7 @@ data "external" "gzip_base64" {
     # Cleanup
     rm -f $tmpfile $gzipfile
     # Output the result in JSON format
-    printf '{\"encoded\": \"%s\"}' "$encoded_output"
+    printf $encoded_output
   EOT
   ]
 }
