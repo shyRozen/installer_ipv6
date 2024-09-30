@@ -1,10 +1,13 @@
 [Unit]
 Description=haproxy
-After=network-online.target
-Wants=network-online.target
+After=network-online.target NetworkManager-wait-online.service
+Wants=network-online.target NetworkManager-wait-online.service
 
 [Service]
 TimeoutStartSec=0
+Restart=always
+RestartSec=5
+ExecStartPre=/bin/sleep 10
 ExecStartPre=-/bin/podman kill haproxy
 ExecStartPre=-/bin/podman rm haproxy
 ExecStartPre=/bin/podman pull quay.io/openshift/origin-haproxy-router
@@ -18,4 +21,3 @@ ExecStop=/bin/podman rm -f haproxy
 
 [Install]
 WantedBy=multi-user.target
-
